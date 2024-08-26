@@ -1,0 +1,13 @@
+package templates
+
+import "uln/src/templates/layouts"
+
+templ Home() {
+    @layouts.Base() {
+        <h1>uln.sh</h1> 
+        <form>
+            <input type="text"></input>
+            <input type="submit"></input>
+        </form>
+    }
+}
