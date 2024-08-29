@@ -1,0 +1,63 @@
+package ln
+
+templ Shortener() {
+    <div class="h-full flex flex-col justify-center m-auto max-w-sm">
+        <h1 class="text-7xl mb-4">
+            uln.sh
+        </h1>
+        <form
+            class="grid grid-cols-2 gap-4"
+        >
+            <input type="text" name="url"
+                placeholder="Enter URL"
+                class="input input-bordered col-span-2"
+            ></input>
+            <button id="create-btn" type="submit"
+                class="btn btn-primary" 
+                hx-post="/ln/create"
+                hx-trigger="click, keyup[key=='Enter'] form:body"
+                hx-indicator="#spinner"
+                hx-target="#query-result"
+                hx-swap="innerHTML"
+            >
+                Shorten
+            </button>
+            <button id="info-btn" type="submit"
+                class="btn btn-secondary"
+                hx-post="/ln/info"
+                hx-trigger="click"
+                hx-target="#query-result"
+                hx-swap="innerHTML"
+            >
+                Get Info
+            </button>
+        </form>
+        <div>
+            <div id="query-result"
+                class="flex justify-center mt-6"
+            >
+            </div>
+            <div class="flex justify-center mt-6">
+                <img id="spinner" 
+                    class="htmx-indicator"
+                    width="24"
+                    src="https://samherbert.net/svg-loaders/svg-loaders/grid.svg"
+                />
+            </div>
+        </div>
+    </div>
+
+}
+
+templ ShortenerAdvancedOptions() {
+
+}
+
+templ ShortLink() {
+
+}
+
+templ LinkInfo() {
+
+}
+

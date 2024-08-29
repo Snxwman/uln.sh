@@ -13,8 +13,8 @@ func main() {
     homeHandler := handlers.HomeHandler{}
     app.GET("/", homeHandler.Handle)
     
-    app.GET("/ln/create", ln.GetShortLink)
-    app.GET("/ln/info", ln.GetShortLinkInfo)
+    app.POST("/ln/create", ln.PostShortLink)
+    app.POST("/ln/info", ln.PostShortLinkInfo)
     app.GET("/:short", ln.Redirect) 
 
     app.Start(":8080")

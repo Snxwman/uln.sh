@@ -1,9 +1,9 @@
 package handlers
 
 import (
-    "github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4"
 
-    "uln/src/templates"
+	"uln/src/templates"
 )
 
 type HomeHandler struct {}

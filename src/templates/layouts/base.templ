@@ -2,16 +2,24 @@ package layouts
 
 templ Base() {
     <!DOCTYPE html>
-    <html lang="en">
+    <html lang="en"
+        data-theme="dracula"
+        class="mx-auto max-w-screen-md font-mono"
+    >
         <head>
-        <meta charset="UTF-8" />
-        <title>μln.sh</title>
-        <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <meta name="description" content="" />
-        <link rel="icon" href="favicon.png">
-    </head>
-    <body>
-        { children... }
-    </body>
+            <meta charset="UTF-8" />
+            <title>μln.sh</title>
+            <meta name="viewport" content="width=device-width,initial-scale=1" />
+            <meta name="description" content="" />
+
+            <script src="https://unpkg.com/htmx.org@2.0.2" integrity="sha384-Y7hw+L/jvKeWIRRkqWYfPcvVxHzVzn5REgzbawhxAuQGwX1XWe70vji+VSeHOThJ" crossorigin="anonymous" />
+            <script src="https://cdn.tailwindcss.com" />
+            <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+        </head>
+        <body
+            class="h-screen"
+        >
+            { children... }
+        </body>
     </html>
 }

@@ -1,3 +1,3 @@
 run:
 	@templ generate
-	@go run src/main.go
+	go build -o ./tmp/main src/main.go && air

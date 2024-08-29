@@ -1,13 +1,12 @@
 package templates
 
-import "uln/src/templates/layouts"
+import (
+    "uln/src/templates/layouts"
+    "uln/src/services/ln"
+)
 
 templ Home() {
     @layouts.Base() {
-        <h1>uln.sh</h1> 
-        <form>
-            <input type="text"></input>
-            <input type="submit"></input>
-        </form>
+        @ln.Shortener()
     }
 }
