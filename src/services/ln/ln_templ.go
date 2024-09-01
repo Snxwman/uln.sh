@@ -26,7 +26,7 @@ func Shortener() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"h-full flex flex-col justify-center m-auto max-w-sm\"><h1 class=\"text-7xl mb-4\">uln.sh</h1><form class=\"grid grid-cols-2 gap-4\"><input type=\"text\" name=\"url\" placeholder=\"Enter URL\" class=\"input input-bordered col-span-2\"> <button id=\"create-btn\" type=\"submit\" class=\"btn btn-primary\" hx-post=\"/ln/create\" hx-trigger=\"click, keyup[key==&#39;Enter&#39;] form:body\" hx-indicator=\"#spinner\" hx-target=\"#query-result\" hx-swap=\"innerHTML\">Shorten</button> <button id=\"info-btn\" type=\"submit\" class=\"btn btn-secondary\" hx-post=\"/ln/info\" hx-trigger=\"click\" hx-target=\"#query-result\" hx-swap=\"innerHTML\">Get Info</button></form><div><div id=\"query-result\" class=\"flex justify-center mt-6\"></div><div class=\"flex justify-center mt-6\"><img id=\"spinner\" class=\"htmx-indicator\" width=\"24\" src=\"https://samherbert.net/svg-loaders/svg-loaders/grid.svg\"></div></div></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"h-full flex flex-col justify-center m-auto max-w-sm\"><h1 class=\"text-center text-7xl mb-4\">μln.sh</h1><form class=\"grid grid-cols-2 gap-4\"><input type=\"text\" name=\"url\" placeholder=\"Enter URL\" class=\"input input-bordered col-span-2\"> <button id=\"create-btn\" type=\"submit\" class=\"btn btn-primary\" hx-post=\"/ln/create\" hx-trigger=\"click, keyup[key==&#39;Enter&#39;] form:body\" hx-indicator=\"#spinner\" hx-target=\"#query-result\" hx-swap=\"innerHTML\">Shorten</button> <button id=\"info-btn\" type=\"submit\" class=\"btn btn-secondary\" hx-post=\"/ln/info\" hx-trigger=\"click\" hx-target=\"#query-result\" hx-swap=\"innerHTML\">Get Info</button></form><div><div id=\"query-result\" class=\"flex justify-center mt-6\"></div><div class=\"flex justify-center mt-6\"><img id=\"spinner\" class=\"htmx-indicator\" width=\"24\" src=\"https://samherbert.net/svg-loaders/svg-loaders/grid.svg\"></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -56,7 +56,7 @@ func ShortenerAdvancedOptions() templ.Component {
 	})
 }
 
-func ShortLink() templ.Component {
+func ShortLink(url string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -74,6 +74,23 @@ func ShortLink() templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a class=\"link link-secondary\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var4 string
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(url)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `src/services/ln/ln.templ`, Line: 56, Col: 40}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
 		return templ_7745c5c3_Err
 	})
 }
@@ -91,9 +108,9 @@ func LinkInfo() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var4 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var4 == nil {
-			templ_7745c5c3_Var4 = templ.NopComponent
+		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var5 == nil {
+			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		return templ_7745c5c3_Err

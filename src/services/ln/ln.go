@@ -1,8 +1,10 @@
 package ln
 
 import (
-    "math/rand"
+	"math/rand"
 )
+
+var lns map[string]shortlink
 
 var chars = []string {
     "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", 
@@ -12,7 +14,7 @@ var chars = []string {
     "1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
 }
 
-func MakePath(length int) string {
+func makePath(length int) string {
     var path string
 
     if length == 0 {
@@ -26,3 +28,14 @@ func MakePath(length int) string {
     return path
 }
 
+func pathExists(path string) bool {
+    return false
+}
+
+func getNextPath() string {
+    return ""
+}
+
+func registerShortlink(s shortlink) {
+    lns[s.shortURL.Path] = s
+}
