@@ -6,7 +6,7 @@ import (
 	"uln/src/models"
 )
 
-type Shortlink struct {
+type shortlink struct {
     fullURL          url.URL
     shortURL         url.URL
     active           bool
@@ -14,11 +14,11 @@ type Shortlink struct {
     reserved         bool
     redirectReqs     int
     infoReqs         int
-    options          ShortURLCreationOptions
+    options          shortURLCreationOptions
     creationMetadata models.CreationMetadata 
 }
 
-type ShortURLCreationOptions struct {
+type shortURLCreationOptions struct {
     shortType string  // TODO: Change to enum
 }
 

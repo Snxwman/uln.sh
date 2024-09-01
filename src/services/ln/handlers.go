@@ -76,9 +76,11 @@ func PostShortLinkInfo(c echo.Context) error {
     return c.String(http.StatusOK, "info") 
 }
 
-func Redirect(c echo.Context) error {
+func GetRedirect(c echo.Context) error {
     fmt.Println(c.Param("short"))
     path := c.Param("short")
-    fullURL := lns[path].fullURL
-    return c.Redirect(http.StatusTemporaryRedirect, fullURL.String())
+    ln := lns["/" + path]
+    fmt.Println(ln)
+    fmt.Println("redirect to -> " + ln.fullURL.String())
+    return c.Redirect(http.StatusPermanentRedirect, ln.fullURL.String())
 }
