@@ -21,7 +21,8 @@ var chars = []string {
 
 type LnApp struct {
     db *sql.DB
-    urls map[string]shortlink
+    urls map[string]*shortlink
+    urlsReverse map[string]string
 }
 
 type PathExistsError struct {}
@@ -38,7 +39,8 @@ func Init() {
     
     lnApp = LnApp {
         db: nil,
-        urls: make(map[string]shortlink),
+        urls: make(map[string]*shortlink),
+        urlsReverse: make(map[string]string),
     }
 }
 
@@ -68,12 +70,22 @@ func getNextPath() string {
     return ""
 }
 
-func registerShortlink(s shortlink) error {
+func shortlinkExists(rawURL string) (string, bool) {
+    path, exists := lnApp.urlsReverse[rawURL]
+    if exists {
+        return path, true
+    } else {
+        return "", false
+    }
+}
+
+func registerShortlink(s *shortlink) error {
     path := strings.Trim(s.shortURL.Path, "/")
     if pathExists(path) {
         return PathExistsError{}
     } else {
         lnApp.urls[path] = s
+        lnApp.urlsReverse[s.fullURL.String()] = path
         return nil
     }
 }

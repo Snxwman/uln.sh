@@ -58,37 +58,42 @@ templ ShortlinkTemplate(url string) {
     <a class="link link-primary">{ url }</a>
 }
 
-templ ShortlinkInfoTemplate(info shortlink) {
+// TODO: Make able to show multiple creation attempts
+templ ShortlinkInfoTemplate(s *shortlink) {
     <div class="card bg-neutral text-neutral-content">
         <div class="card-body items-center text-center">
-            <h2 class="card-title">{ info.shortURL.String() }</h2>
+            <h2 class="card-title">{ s.shortURL.String() }</h2>
             <div class="overflow-x-auto">
                 <table class="table">
                     <tbody>
                         <tr>
                             <th>Points to</th>
-                            <td>{ info.fullURL.String() }</td>
+                            <td>{ s.fullURL.String() }</td>
+                        </tr>
+                        <tr>
+                            <th>Last Access</th>
+                            <td>{ s.lastAccessed.String() }</td>
                         </tr>
                         <tr>
                             <th>Expires</th>
-                            <td>{ info.expiration.String() }</td>
+                            <td>{ s.expiration.String() }</td>
                         </tr>
                         <tr>
                             <th>Created At</th>
-                            <td>{ info.creationMetadata.CreatedAt.String() }</td>
+                            <td>{ s.creationMetadata.CreatedAt.String() }</td>
                         </tr>
                     </tbody>
                 </table>
                 <div class="stats shadow">
                     <div class="stat">
                         <div class="stat-title">Redirects</div>
-                        <div class="stat-value">{ strconv.Itoa(info.redirectReqs) }</div>
+                        <div class="stat-value">{ strconv.Itoa(s.redirectReqs) }</div>
                     </div>
                 </div>
                 <div class="stats shadow">
                     <div class="stat">
                         <div class="stat-title">Info Lookups</div>
-                        <div class="stat-value">{ strconv.Itoa(info.infoReqs) }</div>
+                        <div class="stat-value">{ strconv.Itoa(s.infoReqs) }</div>
                     </div>
                 </div>
             </div>

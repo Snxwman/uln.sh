@@ -10,16 +10,19 @@ type shortlink struct {
     fullURL          url.URL
     shortURL         url.URL
     active           bool
-    expiration       time.Time
     reserved         bool
+    expiration       time.Time
     redirectReqs     int
     infoReqs         int
-    options          shortURLCreationOptions
+    lastAccessed     time.Time
+    options          shortlinkCreationOptions
     creationMetadata models.CreationMetadata 
+    // managementToken  string  // For anonymous management
 }
 
-type shortURLCreationOptions struct {
-    shortType string  // TODO: Change to enum
+type shortlinkCreationOptions struct {
+    shortlinkType string  // TODO: Change to enum
+    unique bool
 }
 
 type EmptyURLError struct {} 
@@ -37,7 +40,7 @@ func (e CouldNotMakePathError) Error() string {
     return "Could not make path"
 }
 
-func makeShortlink(rawURL string) (*shortlink, error) {
+func makeShortlink(rawURL string, creationMetadata models.CreationMetadata) (*shortlink, error) {
     if rawURL == "" {
         return nil, EmptyURLError{}
     }
@@ -61,21 +64,20 @@ func makeShortlink(rawURL string) (*shortlink, error) {
         fullURL: *fullURL,
         shortURL: *shortURL,
         active: true,
-        expiration: time.Now().AddDate(1, 0, 0),
         reserved: false,
+        expiration: time.Now().AddDate(1, 0, 0),
         redirectReqs: 0,
         infoReqs: 0,
-        options: shortURLCreationOptions {
-            shortType: "random",
-        },
-        creationMetadata: models.CreationMetadata {
-            CreatedAt: time.Now(),
-            CreatedByUser: "",
-            CreatedByIP: nil, 
-            CreatedVia: "",
-            InitialCreation: true,
-        },
+        lastAccessed: time.Time{},
+        options: makeShortlinkCreationOptions(), 
+        creationMetadata: creationMetadata,
     }
     return &shortlink, nil
 } 
 
+func makeShortlinkCreationOptions() shortlinkCreationOptions {
+    return shortlinkCreationOptions {
+        shortlinkType: "random",
+        unique: false,
+    }
+}
