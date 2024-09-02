@@ -1,11 +1,15 @@
 package ln
 
 import (
-	"fmt"
+	"database/sql"
 	"math/rand"
+	"strings"
 )
 
-var lns = make(map[string]shortlink)
+const DEBUG bool = true
+
+var BASE_URL string
+var lnApp LnApp
 
 var chars = []string {
     "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", 
@@ -15,7 +19,27 @@ var chars = []string {
     "1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
 }
 
+type LnApp struct {
+    db *sql.DB
+    urls map[string]shortlink
+}
+
+type PathExistsError struct {}
+func (e PathExistsError) Error() string {
+   return "Path already exists" 
+}
+
 func Init() {
+    if DEBUG {
+        BASE_URL = "http://localhost:8080"
+    } else {
+        BASE_URL = "https://uln.sh"
+    }
+    
+    lnApp = LnApp {
+        db: nil,
+        urls: make(map[string]shortlink),
+    }
 }
 
 func makePath(length int) string {
@@ -33,14 +57,23 @@ func makePath(length int) string {
 }
 
 func pathExists(path string) bool {
-    return false
+    _, ok := lnApp.urls[path]
+    if !ok {
+        return false
+    }
+    return true
 }
 
 func getNextPath() string {
     return ""
 }
 
-func registerShortlink(s shortlink) {
-    lns[s.shortURL.Path] = s
-    fmt.Println(lns)
+func registerShortlink(s shortlink) error {
+    path := strings.Trim(s.shortURL.Path, "/")
+    if pathExists(path) {
+        return PathExistsError{}
+    } else {
+        lnApp.urls[path] = s
+        return nil
+    }
 }

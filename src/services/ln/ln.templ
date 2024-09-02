@@ -1,7 +1,9 @@
 package ln
 
-templ Shortener() {
-    <div class="h-full flex flex-col justify-center m-auto max-w-sm">
+import "strconv"
+
+templ ShortenerTemplate() {
+    <div class="h-full flex flex-col justify-center m-auto max-w-md">
         <h1 class="text-center text-7xl mb-4">
             μln.sh
         </h1>
@@ -48,15 +50,53 @@ templ Shortener() {
     </div>
 }
 
-templ ShortenerAdvancedOptions() {
+templ ShortenerAdvancedOptionsTemplate() {
 
 }
 
-templ ShortLink(url string) {
-    <a class="link link-secondary">{ url }</a>
+templ ShortlinkTemplate(url string) {
+    <a class="link link-primary">{ url }</a>
 }
 
-templ LinkInfo() {
-
+templ ShortlinkInfoTemplate(info shortlink) {
+    <div class="card bg-neutral text-neutral-content">
+        <div class="card-body items-center text-center">
+            <h2 class="card-title">{ info.shortURL.String() }</h2>
+            <div class="overflow-x-auto">
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th>Points to</th>
+                            <td>{ info.fullURL.String() }</td>
+                        </tr>
+                        <tr>
+                            <th>Expires</th>
+                            <td>{ info.expiration.String() }</td>
+                        </tr>
+                        <tr>
+                            <th>Created At</th>
+                            <td>{ info.creationMetadata.CreatedAt.String() }</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="stats shadow">
+                    <div class="stat">
+                        <div class="stat-title">Redirects</div>
+                        <div class="stat-value">{ strconv.Itoa(info.redirectReqs) }</div>
+                    </div>
+                </div>
+                <div class="stats shadow">
+                    <div class="stat">
+                        <div class="stat-title">Info Lookups</div>
+                        <div class="stat-value">{ strconv.Itoa(info.infoReqs) }</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-actions justify-end">
+                <button class="btn btn-info">Follow</button>
+                <button class="btn btn-warning">Copy</button>
+            </div>
+        </div>
+    </div>
 }
 
