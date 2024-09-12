@@ -20,6 +20,7 @@ var chars = []string {
 }
 
 type LnApp struct {
+    // TODO: Per service config
     db *sql.DB
     urls map[string]*shortlink
     urlsReverse map[string]string
@@ -30,7 +31,7 @@ func (e PathExistsError) Error() string {
    return "Path already exists" 
 }
 
-func Init() {
+func Init(db *sql.DB) {
     if DEBUG {
         BASE_URL = "http://localhost:8080"
     } else {
@@ -38,10 +39,13 @@ func Init() {
     }
     
     lnApp = LnApp {
-        db: nil,
+        db: db,
         urls: make(map[string]*shortlink),
         urlsReverse: make(map[string]string),
     }
+
+    
+    initDatabase(lnApp.db)
 }
 
 func makePath(length int) string {

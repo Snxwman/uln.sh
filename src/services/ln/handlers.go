@@ -21,9 +21,9 @@ func PostShortlink(c echo.Context) error {
         shortlink := lnApp.urls[path]
 
         if util.RequestViaCli(c) {
-            return c.String(http.StatusCreated, shortlink.shortURL.String() + "\n") 
+            return c.String(http.StatusOK, shortlink.shortURL.String() + "\n") 
         } else {
-            c.Response().WriteHeader(http.StatusCreated)
+            c.Response().WriteHeader(http.StatusOK)
             return util.Render(c, ShortlinkTemplate(shortlink.shortURL.String())) 
         }
     }
