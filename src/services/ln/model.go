@@ -18,6 +18,8 @@ type shortlink struct {
     options          shortlinkCreationOptions
     creationMetadata models.CreationMetadata 
     // managementToken  string  // For anonymous management
+    // cacheInvalidate bool
+    // tableId uuid
 }
 
 type shortlinkCreationOptions struct {

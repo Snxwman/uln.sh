@@ -39,13 +39,13 @@ func Init(db *sql.DB) {
     }
     
     lnApp = LnApp {
-        db: db,
+        db: nil,
         urls: make(map[string]*shortlink),
         urlsReverse: make(map[string]string),
     }
 
     
-    initDatabase(lnApp.db)
+    // initDatabase()
 }
 
 func makePath(length int) string {

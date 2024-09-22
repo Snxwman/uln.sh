@@ -7,7 +7,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"golang.org/x/crypto/acme/autocert"
 	"golang.org/x/net/http2"
 
 	"uln/src/handlers"
@@ -18,19 +17,19 @@ import (
 const PORT int = 8080
 
 type ulnApp struct {
-    config config
+    // config config
     db *sql.DB
 }
 
 func main() {
     uln := ulnApp {
-        config: config {},
+        // config: config {},
         db: store.Init(),
     }
     defer uln.db.Close()
 
     app := echo.New()
-    app.AutoTLSManager.Cache = autocert.DirCache("/var/www/.cache")
+    // app.AutoTLSManager.Cache = autocert.DirCache("/var/www/.cache")
 
     app.Use(middleware.Recover())
     app.Use(middleware.Logger())
@@ -44,18 +43,22 @@ func main() {
     // admin := app.Group("/admin", )
     // admin.GET("/ln",)
 
-    ln.Init(uln.db)
+    ln.Init(nil)
     // ln := app.Group("ln", m ...echo.MiddlewareFunc)
     app.POST("/ln/create", ln.PostShortlink)
     app.POST("/ln/info", ln.PostShortlinkInfo)
-    // app.GET("/ln/info/:short", ln.PostShortlinkInfo)
-    app.DELETE("/ln/delete", ln.DeleteShortlink)
     app.GET("/:path", ln.GetRedirect) 
+    // app.GET("/:path/info", ln.PostShortlinkInfo)
+    app.DELETE("/:path/delete", ln.DeleteShortlink)
 
-    s := &http2.Server{
+    s := &http2.Server {
         MaxConcurrentStreams: 250,
         MaxReadFrameSize:     1048576,
         IdleTimeout:          10 * time.Second,
     }
-    app.StartH2CServer(fmt.Sprintf(":%d", PORT), s)
+
+    err := app.StartH2CServer(fmt.Sprintf(":%d", PORT), s)
+    if err != nil {
+        fmt.Println(err)
+    }
 }

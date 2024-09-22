@@ -13,7 +13,7 @@ func Init() *sql.DB {
 
     db, err := sql.Open("postgres", connURL)
     if err != nil {
-        panic(err)
+        fmt.Println(err)
     }
 
     return db

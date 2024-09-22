@@ -2,48 +2,136 @@ package ln
 
 import (
 	"context"
-	"database/sql"
 	"log"
 	"time"
+    
+    _ "github.com/lib/pq"
 )
 
-func initDatabase(db *sql.DB) error {
+const defaultTimeout time.Duration = 5*time.Second
+
+func defaultTableValues(s *shortlink) bool {
+    zeroTime := time.Time{}
+
+    if !s.active || 
+        s.reserved || 
+        s.redirectReqs != 0 || 
+        s.infoReqs != 0 || 
+        s.lastAccessed != zeroTime {
+        return false
+    }
+
+    return true
+}
+
+func initTables() error {
     query := `
     CREATE TABLE IF NOT EXISTS 
     shortlinks(
-        id int primary key auto_increment
-        full_url string
-        short_url string
-        active bool default true
-        reserved bool default false
-        expiration datetime
-        redirect_reqs int default 0
-        info_reqs int default 0
-        last_accessed datetime
-    )
+        id UUID PRIMARY KEY,
+        full_url TEXT NOT NULL,
+        short_url TEXT UNIQUE NOT NULL,
+        active BOOL DEFAULT true,
+        reserved BOOL DEFAULT false,
+        redirect_reqs INT8 DEFAULT 0,
+        info_reqs INT8 DEFAULT 0,
+        expiration TIMESTAMP,
+        last_accessed TIMESTAMP DEFAULT null
+    );
     `
-    
-    ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+
+    ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
     defer cancel()
 
-    _, err := db.ExecContext(ctx, query)
+    _, err := lnApp.db.ExecContext(ctx, query)
     if err != nil {
-        log.Printf("Error %s when creating shortlinks table", err)
+        // TODO: Customize error messages
+        log.Printf("%s", err)
         return err
     }
 
-    log.Printf("Shortlinks table initialized")
+    log.Printf("")
+
     return nil
 }
 
-func insertShortlink(s *shortlink, db *sql.DB) error {
+func destroyDatabase() error {
     return nil
 }
 
-func updateShortlink(s *shortlink, db *sql.DB) error {
+func getShortlinkByPath(path string) error {
     return nil
 }
 
-func deleteShortlink(s *shortlink, db *sql.DB) error {
+func getShortlinkByID(id string) error {
     return nil
 }
+
+// func insertShortlink(s *shortlink) error {
+//     query := `
+//     INSERT INTO shortlinks (full_url, short_url, expiration)
+//     VALUES($1, $2, $3);
+//     `
+//
+//     queryParams := queryParams {
+//         query: query,
+//         args: [3]any{s.fullURL, s.shortURL, s.expiration},
+//         successMessage: "Inserted shortlink into table",
+//         errorMessage: "Failed to insert shortlink",
+//         timeout: 5*time.Second,
+//     }
+//
+//     err := execQuery(queryParams)
+//     if err != nil {
+//         return err
+//     }
+//
+//     if !defaultTableValues(s) {
+//         err := updateShortlink(s, db)
+//         if err != nil {
+//             return err
+//         }
+//     }
+//
+//     return nil
+// }
+
+// func updateShortlink(s *shortlink) error {
+//     query := `
+//     ;
+//     `
+//
+//     queryParams := queryParams {
+//         query: query,
+//         successMessage: "Updated row in shortlinks table",
+//         errorMessage: "Failed to insert shortlink",
+//         timeout: 5*time.Second,
+//     }
+//
+//     err := execQuery(queryParams)
+//     if err != nil {
+//         return err
+//     }
+//     
+//     return nil
+// }
+
+// func deleteShortlink(s *shortlink) error {
+//     query := `
+//     ;
+//     `
+//
+//     queryParams := queryParams {
+//         query: query,
+//         successMessage: "Deleted row from shortlinks table",
+//         errorMessage: "Failed to delete row from shortlinks table",
+//         timeout: 5*time.Second,
+//     }
+//
+//     err := execQuery(queryParams)
+//     if err != nil {
+//         return err
+//     }
+//
+//     return nil
+// }

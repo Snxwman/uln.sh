@@ -1,0 +1,37 @@
+services:
+  
+  web:
+    container_name: uln-web
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - 3000:8080
+    volumes:
+      - ./:/app
+  
+  postgres:
+    container_name: uln-postgres
+    image: postgres
+    restart: always
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=uln
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=secret
+    ports:
+      - 5432:5432
+
+  pgadmin:
+    container_name: uln-pgadmin
+    image: dpage/pgadmin4:latest
+    restart: always
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=test@snowlab.io
+      - PGADMIN_DEFAULT_PASSWORD=secret
+    ports:
+      - 5050:80
+
+volumes:
+  db-data:
