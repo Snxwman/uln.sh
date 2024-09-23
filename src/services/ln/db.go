@@ -24,10 +24,30 @@ func defaultTableValues(s *shortlink) bool {
     return true
 }
 
+func initDatabase() error {
+    query := `
+    CREATE TYPE shortlink_type AS ENUM (
+        'random',
+        'base62',
+        'custom'
+    );
+    `
+
+    ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
+    defer cancel()
+    
+    _, err := lnApp.db.ExecContext(ctx, query)
+    if err != nil {
+        return err
+    }
+
+    return nil
+}
+
 func initTables() error {
     query := `
     CREATE TABLE IF NOT EXISTS 
-    shortlinks(
+    shortlinks (
         id UUID PRIMARY KEY,
         full_url TEXT NOT NULL,
         short_url TEXT UNIQUE NOT NULL,
@@ -37,6 +57,21 @@ func initTables() error {
         info_reqs INT8 DEFAULT 0,
         expiration TIMESTAMP,
         last_accessed TIMESTAMP DEFAULT null
+    );
+
+    CREATE TABLE IF NOT EXISTS
+    shortlink_creation_options (
+        id UUID PRIMARY KEY,
+        shortlink_id UUID,
+        creation_event_id UUID,
+        shortlink_type shortlink_type,
+        keep_unique BOOL DEFAULT true,
+        CONSTRAINT fk_shortlink_id
+            FOREIGN KEY(shortlink_id)
+                REFERENCES shortlinks(id),
+        CONSTRAINT fk_creation_event
+            FOREIGN KEY(creation_event_id)
+                REFERENCES creation_events(id)
     );
     `
 
@@ -50,7 +85,6 @@ func initTables() error {
         return err
     }
 
-    log.Printf("")
 
     return nil
 }

@@ -43,7 +43,7 @@ func main() {
     // admin := app.Group("/admin", )
     // admin.GET("/ln",)
 
-    ln.Init(nil)
+    ln.Init(uln.db)
     // ln := app.Group("ln", m ...echo.MiddlewareFunc)
     app.POST("/ln/create", ln.PostShortlink)
     app.POST("/ln/info", ln.PostShortlinkInfo)
