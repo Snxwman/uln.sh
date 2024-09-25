@@ -2,13 +2,134 @@ package ln
 
 import (
 	"context"
-	"log"
+	"database/sql"
 	"time"
-    
-    _ "github.com/lib/pq"
+	"uln/src/store"
+
+	_ "github.com/lib/pq"
 )
 
+const createShortlinkTypeEnumQuery store.QueryString = `
+    CREATE TYPE shortlink_type AS ENUM (
+        'random',
+        'base62',
+        'custom'
+    );
+`
+
+const createShortlinkTableQuery store.QueryString = `
+    CREATE TABLE IF NOT EXISTS 
+    shortlinks (
+        id UUID PRIMARY KEY,
+        full_url TEXT NOT NULL,
+        short_url TEXT UNIQUE NOT NULL,
+        active BOOL DEFAULT true,
+        reserved BOOL DEFAULT false,
+        redirect_reqs INT8 DEFAULT 0,
+        info_reqs INT8 DEFAULT 0,
+        expiration TIMESTAMP,
+        last_accessed TIMESTAMP DEFAULT null
+    );
+`
+
+const createShortlinkCreationOptionsTableQuery store.QueryString = `
+    CREATE TABLE IF NOT EXISTS
+    shortlink_creation_options (
+        id UUID PRIMARY KEY,
+        shortlink_id UUID,
+        creation_event_id UUID,
+        shortlink_type shortlink_type,
+        keep_unique BOOL DEFAULT true,
+        CONSTRAINT fk_shortlink_id
+            FOREIGN KEY(shortlink_id)
+                REFERENCES shortlinks(id),
+        CONSTRAINT fk_creation_event
+            FOREIGN KEY(creation_event_id)
+                REFERENCES creation_events(id)
+    );
+`
+
+const insertShortlinkWithDefaultsQuery store.QueryString = `
+    INSERT INTO 
+    shortlinks (
+        id,
+        full_url, 
+        short_url, 
+        expiration
+    )
+    VALUES(gen_random_uuid(), $1, $2, $3);
+`
+
+const insertShortlinkFullQuery store.QueryString = `
+    INSERT INTO
+    shortlinks (
+        id,
+        full_url,
+        short_url,
+        active,
+        reserved,
+        redirect_reqs,
+        info_reqs,
+        expiration,
+        last_accessed
+    )
+    VALUES(gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8);
+`
+
+const insertShortlinkCreationOptionsQuery store.QueryString = `
+    INSERT INTO
+    shortlink_creation_options (
+        id,
+        shortlink_id,
+        creation_event_id,
+        shortlink_type,
+        keep_unique,
+    )
+    VALUES(gen_random_uuid(), $1, $2, $3, $4);
+`
+
+const getShortlinkByPathQuery store.QueryString = `
+    SELECT * FROM shortlinks
+    WHERE short_url = $1;
+`
+
+const getShortlinkByIdQuery store.QueryString = `
+    SELECT * FROM shortlinks
+    WHERE id = $1;
+`
+
+const getShortlinksForUserQuery store.QueryString = `
+
+`
+
+const getShortlinksForTokenQuery store.QueryString = `
+
+`
+
+const getShortlinksForIpQuery store.QueryString = `
+
+`
+
+const updateShortlinkQuery store.QueryString = `
+
+`
+
+const deleteShortlinkQuery store.QueryString = `
+
+`
+
+const deleteShortlinkCreationOptionsQuery store.QueryString = `
+
+`
+
 const defaultTimeout time.Duration = 5*time.Second
+
+type queryParams struct {
+    query store.QueryString
+    timeout time.Duration
+    errMsg string
+    okMsg string
+}
 
 func defaultTableValues(s *shortlink) bool {
     zeroTime := time.Time{}
@@ -24,19 +145,37 @@ func defaultTableValues(s *shortlink) bool {
     return true
 }
 
-func initDatabase() error {
-    query := `
-    CREATE TYPE shortlink_type AS ENUM (
-        'random',
-        'base62',
-        'custom'
-    );
-    `
-
+func execWithParams(params queryParams) error {
     ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
     defer cancel()
     
-    _, err := lnApp.db.ExecContext(ctx, query)
+    _, err := lnApp.db.ExecContext(ctx, string(params.query))
+    if err != nil {
+        return err
+    }
+    return nil
+}
+
+func queryWithParams(params queryParams) (*sql.Rows, error) {
+    ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
+    defer cancel()
+    
+    rows, err := lnApp.db.QueryContext(ctx, string(params.query))
+    if err != nil {
+        return nil, err
+    }
+
+    return rows, nil
+}
+
+func initDatabase() error {
+    err := execWithParams(queryParams {
+        query: createShortlinkTypeEnumQuery,
+        timeout: defaultTimeout,
+        errMsg: "",
+        okMsg: "",
+    })
+
     if err != nil {
         return err
     }
@@ -45,46 +184,23 @@ func initDatabase() error {
 }
 
 func initTables() error {
-    query := `
-    CREATE TABLE IF NOT EXISTS 
-    shortlinks (
-        id UUID PRIMARY KEY,
-        full_url TEXT NOT NULL,
-        short_url TEXT UNIQUE NOT NULL,
-        active BOOL DEFAULT true,
-        reserved BOOL DEFAULT false,
-        redirect_reqs INT8 DEFAULT 0,
-        info_reqs INT8 DEFAULT 0,
-        expiration TIMESTAMP,
-        last_accessed TIMESTAMP DEFAULT null
-    );
+    params := queryParams {
+        query: createShortlinkTableQuery,
+        timeout: defaultTimeout,
+        errMsg: "",
+        okMsg: "",
+    }
 
-    CREATE TABLE IF NOT EXISTS
-    shortlink_creation_options (
-        id UUID PRIMARY KEY,
-        shortlink_id UUID,
-        creation_event_id UUID,
-        shortlink_type shortlink_type,
-        keep_unique BOOL DEFAULT true,
-        CONSTRAINT fk_shortlink_id
-            FOREIGN KEY(shortlink_id)
-                REFERENCES shortlinks(id),
-        CONSTRAINT fk_creation_event
-            FOREIGN KEY(creation_event_id)
-                REFERENCES creation_events(id)
-    );
-    `
-
-    ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
-    defer cancel()
-
-    _, err := lnApp.db.ExecContext(ctx, query)
+    err := execWithParams(params)
     if err != nil {
-        // TODO: Customize error messages
-        log.Printf("%s", err)
         return err
     }
 
+    params.query = createShortlinkCreationOptionsTableQuery
+    err = execWithParams(params)
+    if err != nil {
+        return err
+    }
 
     return nil
 }
@@ -93,79 +209,42 @@ func destroyDatabase() error {
     return nil
 }
 
-func getShortlinkByPath(path string) error {
+func getShortlinkByPath(path string) (shortlink, error) {
+    return shortlink{}, nil
+}
+
+func getShortlinkByID(id string) (shortlink, error) {
+    return shortlink{}, nil
+}
+
+func getShortlinksForUser() ([]shortlink, error) {
+    return []shortlink{}, nil
+}
+
+func getShortlinksForToken() ([]shortlink, error) {
+    return []shortlink{}, nil
+}
+
+func getShortlinksForIp() ([]shortlink, error) {
+    return []shortlink{}, nil
+}
+
+func insertShortlink(s *shortlink) error {
     return nil
 }
 
-func getShortlinkByID(id string) error {
+func insertShortlinkCreationOptions() error {
     return nil
 }
 
-// func insertShortlink(s *shortlink) error {
-//     query := `
-//     INSERT INTO shortlinks (full_url, short_url, expiration)
-//     VALUES($1, $2, $3);
-//     `
-//
-//     queryParams := queryParams {
-//         query: query,
-//         args: [3]any{s.fullURL, s.shortURL, s.expiration},
-//         successMessage: "Inserted shortlink into table",
-//         errorMessage: "Failed to insert shortlink",
-//         timeout: 5*time.Second,
-//     }
-//
-//     err := execQuery(queryParams)
-//     if err != nil {
-//         return err
-//     }
-//
-//     if !defaultTableValues(s) {
-//         err := updateShortlink(s, db)
-//         if err != nil {
-//             return err
-//         }
-//     }
-//
-//     return nil
-// }
+func updateShortlink(s *shortlink) error {
+    return nil
+}
 
-// func updateShortlink(s *shortlink) error {
-//     query := `
-//     ;
-//     `
-//
-//     queryParams := queryParams {
-//         query: query,
-//         successMessage: "Updated row in shortlinks table",
-//         errorMessage: "Failed to insert shortlink",
-//         timeout: 5*time.Second,
-//     }
-//
-//     err := execQuery(queryParams)
-//     if err != nil {
-//         return err
-//     }
-//     
-//     return nil
-// }
+func deleteShortlink(s *shortlink) error {
+    return nil
+}
 
-// func deleteShortlink(s *shortlink) error {
-//     query := `
-//     ;
-//     `
-//
-//     queryParams := queryParams {
-//         query: query,
-//         successMessage: "Deleted row from shortlinks table",
-//         errorMessage: "Failed to delete row from shortlinks table",
-//         timeout: 5*time.Second,
-//     }
-//
-//     err := execQuery(queryParams)
-//     if err != nil {
-//         return err
-//     }
-//
-//     return nil
-// }
+func deleteShortlinkCreationOptions() error {
+    return nil
+}
