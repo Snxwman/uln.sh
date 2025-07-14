@@ -1,15 +1,16 @@
 package ln
 
 import (
-	"database/sql"
+	"fmt"
 	"math/rand"
 	"strings"
+
+	"github.com/jmoiron/sqlx"
 )
 
 const DEBUG bool = true
 
 var BASE_URL string
-var lnApp LnApp
 
 var chars = []string {
     "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", 
@@ -19,11 +20,11 @@ var chars = []string {
     "1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
 }
 
+var lnApp LnApp
 type LnApp struct {
     // TODO: Per service config
-    db *sql.DB
-    urls map[string]*shortlink
-    urlsReverse map[string]string
+    db lnDB
+    cache lnCache
 }
 
 type PathExistsError struct {}
@@ -31,7 +32,7 @@ func (e PathExistsError) Error() string {
    return "Path already exists" 
 }
 
-func Init(db *sql.DB) {
+func Init(db *sqlx.DB) {
     if DEBUG {
         BASE_URL = "http://localhost:8080"
     } else {
@@ -39,16 +40,15 @@ func Init(db *sql.DB) {
     }
     
     lnApp = LnApp {
-        db: db,
-        urls: make(map[string]*shortlink),
-        urlsReverse: make(map[string]string),
+        db: newLnDB(db),
+        cache: newLnCache(),
     }
 
-    initDatabase()
-    initTables()    
+    lnApp.db.initDatabase()
+    lnApp.db.initTables()    
 }
 
-func makePath(length int) string {
+func makeRandomPath(length int) string {
     var path string
 
     if length == 0 {
@@ -62,34 +62,57 @@ func makePath(length int) string {
     return path
 }
 
-func pathExists(path string) bool {
-    _, ok := lnApp.urls[path]
-    if !ok {
-        return false
-    }
-    return true
+func makeBase62Path(url string, length int) string {
+    return ""
+}
+
+func validateCustomPath(path string) bool {
+    // Check user perms to make a custom url
+    // Check banned/reserved paths
+    // Check cache and db for duplicates
+    return false
 }
 
 func getNextPath() string {
     return ""
 }
 
-func shortlinkExists(rawURL string) (string, bool) {
-    path, exists := lnApp.urlsReverse[rawURL]
-    if exists {
-        return path, true
+func tryGetShortlinkByPath(path string) (*shortlink, bool) {
+    shortlinkFromCache, inCache := lnApp.cache.contains(path)
+    shortlinkFromDb, inDb := lnApp.db.getShortlinkByPath(path)
+
+    if !inCache && inDb != nil {
+        return nil, false
+    }
+
+    if inCache {
+        return shortlinkFromCache, true 
     } else {
-        return "", false
+        return shortlinkFromDb, true 
     }
 }
 
+func tryGetShortlinkForUrl(rawURL string) ([]*shortlink, bool) {
+    shortlinkFromCache, inCache := lnApp.cache.containsReverse(rawURL)
+    shortlinksFromDb, inDb := lnApp.db.getShortlinksForUrl(rawURL)
+    fmt.Printf("URL in cache: %t \nURL in database: %t\n", inCache, inDb)
+
+    if inCache {
+        return []*shortlink{shortlinkFromCache}, true 
+    } else if inDb {
+        return shortlinksFromDb, true 
+    }
+
+    return nil, false
+}
+
 func registerShortlink(s *shortlink) error {
-    path := strings.Trim(s.shortURL.Path, "/")
-    if pathExists(path) {
+    // FIXME: Inappropriate place to do this check
+    path := strings.Trim(s.ShortURL.Path, "/")
+    if _, inCache := lnApp.cache.contains(path); inCache {
         return PathExistsError{}
     } else {
-        lnApp.urls[path] = s
-        lnApp.urlsReverse[s.fullURL.String()] = path
+        lnApp.cache.insert(s)
         return nil
     }
 }

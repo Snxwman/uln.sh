@@ -3,18 +3,19 @@ package ln
 import (
 	"net/url"
 	"time"
+
 	"uln/src/models"
 )
 
 type shortlink struct {
-    fullURL          url.URL
-    shortURL         url.URL
-    active           bool
-    reserved         bool
-    expiration       time.Time
-    redirectReqs     int
-    infoReqs         int
-    lastAccessed     time.Time
+    FullURL          url.URL                    `db:"full_url"`
+    ShortURL         url.URL                    `db:"short_url"`
+    Active           bool                       `db:"active"`
+    Reserved         bool                       `db:"reserved"`
+    Expiration       time.Time                  `db:"expiration"`
+    RedirectReqs     int                        `db:"redirect_reqs"`
+    InfoReqs         int                        `db:"info_reqs"`
+    LastAccessed     time.Time                  `db:"last_accessed"`
     options          shortlinkCreationOptions
     creationMetadata models.CreationMetadata 
     // managementToken  string  // For anonymous management
@@ -56,21 +57,21 @@ func makeShortlink(rawURL string, creationMetadata models.CreationMetadata) (*sh
     //     - Check URL is valid
     //     - Make sure (minimally) scheme, domain, and TLD are populated
     
-    path := makePath(7)
+    path := makeRandomPath(7)
     shortURL, err := url.Parse(BASE_URL + "/" + path)
     if err != nil {
         return nil, CouldNotMakePathError{}
     }
     
     shortlink := shortlink {
-        fullURL: *fullURL,
-        shortURL: *shortURL,
-        active: true,
-        reserved: false,
-        expiration: time.Now().AddDate(1, 0, 0),
-        redirectReqs: 0,
-        infoReqs: 0,
-        lastAccessed: time.Time{},
+        FullURL: *fullURL,
+        ShortURL: *shortURL,
+        Active: true,
+        Reserved: false,
+        Expiration: time.Now().AddDate(1, 0, 0),
+        RedirectReqs: 0,
+        InfoReqs: 0,
+        LastAccessed: time.Time{},
         options: makeShortlinkCreationOptions(), 
         creationMetadata: creationMetadata,
     }

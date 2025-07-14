@@ -1,10 +1,10 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"time"
 
+	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"golang.org/x/net/http2"
@@ -18,7 +18,7 @@ const PORT int = 8080
 
 type ulnApp struct {
     // config config
-    db *sql.DB
+    db *sqlx.DB
 }
 
 func main() {
@@ -46,10 +46,12 @@ func main() {
     ln.Init(uln.db)
     // ln := app.Group("ln", m ...echo.MiddlewareFunc)
     app.POST("/ln/create", ln.PostShortlink)
+    // TODO: Eliminate
     app.POST("/ln/info", ln.PostShortlinkInfo)
     app.GET("/:path", ln.GetRedirect) 
+    app.DELETE("/:path", ln.DeleteShortlink)
     // app.GET("/:path/info", ln.PostShortlinkInfo)
-    app.DELETE("/:path/delete", ln.DeleteShortlink)
+    // app.PUT("/:path/extend", ln.PutExtendShortlinkExpirtation)
 
     s := &http2.Server {
         MaxConcurrentStreams: 250,

@@ -62,21 +62,21 @@ templ ShortlinkTemplate(url string) {
 templ ShortlinkInfoTemplate(s *shortlink) {
     <div class="card bg-neutral text-neutral-content">
         <div class="card-body items-center text-center">
-            <h2 class="card-title">{ s.shortURL.String() }</h2>
+            <h2 class="card-title">{ s.ShortURL.String() }</h2>
             <div class="overflow-x-auto">
                 <table class="table">
                     <tbody>
                         <tr>
                             <th>Points to</th>
-                            <td>{ s.fullURL.String() }</td>
+                            <td>{ s.FullURL.String() }</td>
                         </tr>
                         <tr>
                             <th>Last Access</th>
-                            <td>{ s.lastAccessed.String() }</td>
+                            <td>{ s.LastAccessed.String() }</td>
                         </tr>
                         <tr>
                             <th>Expires</th>
-                            <td>{ s.expiration.String() }</td>
+                            <td>{ s.Expiration.String() }</td>
                         </tr>
                         <tr>
                             <th>Created At</th>
@@ -87,13 +87,13 @@ templ ShortlinkInfoTemplate(s *shortlink) {
                 <div class="stats shadow">
                     <div class="stat">
                         <div class="stat-title">Redirects</div>
-                        <div class="stat-value">{ strconv.Itoa(s.redirectReqs) }</div>
+                        <div class="stat-value">{ strconv.Itoa(s.RedirectReqs) }</div>
                     </div>
                 </div>
                 <div class="stats shadow">
                     <div class="stat">
                         <div class="stat-title">Info Lookups</div>
-                        <div class="stat-value">{ strconv.Itoa(s.infoReqs) }</div>
+                        <div class="stat-value">{ strconv.Itoa(s.InfoReqs) }</div>
                     </div>
                 </div>
             </div>

@@ -133,7 +133,7 @@ func ShortlinkInfoTemplate(s *shortlink) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var6 string
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(s.shortURL.String())
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(s.ShortURL.String())
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `src/services/ln/ln.templ`, Line: 65, Col: 56}
 		}
@@ -146,7 +146,7 @@ func ShortlinkInfoTemplate(s *shortlink) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var7 string
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(s.fullURL.String())
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(s.FullURL.String())
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `src/services/ln/ln.templ`, Line: 71, Col: 52}
 		}
@@ -159,7 +159,7 @@ func ShortlinkInfoTemplate(s *shortlink) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var8 string
-		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(s.lastAccessed.String())
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(s.LastAccessed.String())
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `src/services/ln/ln.templ`, Line: 75, Col: 57}
 		}
@@ -172,7 +172,7 @@ func ShortlinkInfoTemplate(s *shortlink) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var9 string
-		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(s.expiration.String())
+		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(s.Expiration.String())
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `src/services/ln/ln.templ`, Line: 79, Col: 55}
 		}
@@ -198,7 +198,7 @@ func ShortlinkInfoTemplate(s *shortlink) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var11 string
-		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(s.redirectReqs))
+		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(s.RedirectReqs))
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `src/services/ln/ln.templ`, Line: 90, Col: 78}
 		}
@@ -211,7 +211,7 @@ func ShortlinkInfoTemplate(s *shortlink) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var12 string
-		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(s.infoReqs))
+		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(s.InfoReqs))
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `src/services/ln/ln.templ`, Line: 96, Col: 74}
 		}

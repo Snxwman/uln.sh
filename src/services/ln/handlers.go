@@ -1,6 +1,9 @@
 package ln
 
 import (
+	"errors"
+	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -14,23 +17,27 @@ import (
 
 // TODO: Create unique override
 func PostShortlink(c echo.Context) error {
+    // Get the URL to shorten from the request form
     rawURL := c.Request().FormValue("url")
 
-    // Check if a shortlink already exists
-    if path, exists := shortlinkExists(rawURL); exists {
-        shortlink := lnApp.urls[path]
-
+    shortlinks, exists := tryGetShortlinkForUrl(rawURL)
+    if exists { 
+        shortlink := shortlinks[0]
+        fmt.Println(shortlink)
         if util.RequestViaCli(c) {
-            return c.String(http.StatusOK, shortlink.shortURL.String() + "\n") 
+            return c.String(http.StatusOK, shortlink.ShortURL.String() + "\n") 
         } else {
             c.Response().WriteHeader(http.StatusOK)
-            return util.Render(c, ShortlinkTemplate(shortlink.shortURL.String())) 
+            return util.Render(c, ShortlinkTemplate(shortlink.ShortURL.String())) 
         }
     }
 
-    creationMetadata := models.MakeCreationMetadata(c, true)
+    isInitialCreation := true
+    creationMetadata := models.MakeCreationMetadata(c, isInitialCreation)
+    // shortlinkCreationOptions := makeShortlinkCreationOptions()
     shortlink, err := makeShortlink(rawURL, creationMetadata)
 
+    // Handle errors while making the shortlink
     switch err.(type) {
     case EmptyURLError:
         return c.String(http.StatusBadRequest, err.Error())
@@ -40,16 +47,26 @@ func PostShortlink(c echo.Context) error {
         return c.String(http.StatusBadRequest, err.Error())
     }
 
+    // Add shortlink to cache
     err = registerShortlink(shortlink)
     if err != nil {
+        log.Printf("Error registering shortlink: %s", err.Error())
         return c.String(http.StatusBadRequest, err.Error())
     }
 
+    // Commit shortlink to database
+    err = lnApp.db.insertShortlink(shortlink)
+    if err != nil {
+        log.Printf("Error inserting shortlink: %s", err.Error())
+        return errors.New("Error while inserting shortlink")
+    }
+
+    // Return the result to user
     if util.RequestViaCli(c) {
-        return c.String(http.StatusCreated, shortlink.shortURL.String() + "\n") 
+        return c.String(http.StatusCreated, shortlink.ShortURL.String() + "\n") 
     } else {
         c.Response().WriteHeader(http.StatusCreated)
-        return util.Render(c, ShortlinkTemplate(shortlink.shortURL.String())) 
+        return util.Render(c, ShortlinkTemplate(shortlink.ShortURL.String())) 
     }
 }
 
@@ -61,16 +78,16 @@ func PostShortlinkInfo(c echo.Context) error {
 
     path := strings.Trim(url.Path, "/")
 
-    shortlink, ok := lnApp.urls[path]
-    if !ok {
+    shortlink, inCache := lnApp.cache.contains(path)
+    if !inCache {
         return c.JSON(http.StatusNotFound, map[string]string{"error": "No shortlink found"})
     }
 
-    shortlink.infoReqs++
-    lnApp.urls[path] = shortlink
+    shortlink.InfoReqs++
+    lnApp.cache.insert(shortlink)
 
     if util.RequestViaCli(c) {
-        return c.String(http.StatusOK, shortlink.fullURL.String()) 
+        return c.String(http.StatusOK, shortlink.FullURL.String()) 
     } else {
         c.Response().WriteHeader(http.StatusOK)
         return util.Render(c, ShortlinkInfoTemplate(shortlink))
@@ -79,14 +96,14 @@ func PostShortlinkInfo(c echo.Context) error {
 
 func GetRedirect(c echo.Context) error {
     path := c.Param("path")
-    shortlink, ok := lnApp.urls[path]
-    if !ok {
+    shortlink, exists := tryGetShortlinkByPath(path)
+    if exists {
         return c.String(http.StatusNotFound, "No shortlink found")
     }
 
-    shortlink.redirectReqs++
-    shortlink.lastAccessed = time.Now()
-    lnApp.urls[path] = shortlink
+    shortlink.RedirectReqs++
+    shortlink.LastAccessed = time.Now()
+    lnApp.cache.insert(shortlink)
 
     // Headers from google url shortener
     // https://stackoverflow.com/questions/47770376/why-does-url-shortening-service-send-response-with-http-status-codes-301-and-cac
@@ -94,7 +111,7 @@ func GetRedirect(c echo.Context) error {
     c.Response().Header().Add("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate")
     c.Response().Header().Add("Pragma", "no-cache")
     c.Response().Header().Add("Expires", "Mon, 01 Jan 1990 00:00:00 GMT")
-    return c.Redirect(http.StatusPermanentRedirect, shortlink.fullURL.String())
+    return c.Redirect(http.StatusPermanentRedirect, shortlink.FullURL.String())
 }
 
 func DeleteShortlink(c echo.Context) error {
