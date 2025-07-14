@@ -1,0 +1,7 @@
+[project]
+name = "uln"
+version = "0.0.1"
+description = "Terminal micro utilities"
+readme = "readme.md"
+requires-python = ">=3.13"
+dependencies = []
